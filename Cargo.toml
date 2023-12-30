@@ -1,0 +1,20 @@
+[package]
+name = "cp-config-client"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+cp-core = "0.2.22"
+
+tokio = { version = "1.35", features = ["full"] }
+
+reqwest = "0.11"
+
+uuid = { version = "1.6", features = ["v4"] }
+
+zip = "0.6.6"
+
+clap = "2.34"
