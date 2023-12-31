@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 10
 
     services:
-      cp-config:
+      config:
         image: gabriel0simpleg/cp-config:latest
         ports:
           - 3000:3000
@@ -26,7 +26,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Replace cp-config url in test_data config file
         run: |
-          sed -i 's/127.0.0.1:3000/cp-config:3000/' ./test_data/config_retriever/config.yaml
+          sed -i 's/127.0.0.1:3000/config:3000/' ./test_data/config_retriever/config.yaml
       - name: Run tests
         run: |
           mkdir bin
