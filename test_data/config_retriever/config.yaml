@@ -1,2 +1,2 @@
 AccessTokenSecret: "40ce75a9-a98a-4534-9a52-b0ce00c09214"
-Host: "http://127.0.0.1:3000"
+Host: "http://127.0.0.1:3000" # Value is included within .github/workflows/ci-only.yaml & .github/workflows/ci-cd.yaml
