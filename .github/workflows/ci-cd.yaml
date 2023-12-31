@@ -46,6 +46,14 @@ jobs:
       - name: Replace placeholder version
         run: |
           sed -i 's/5123.0.0/${{ env.VERSION }}/' ./Cargo.toml
+      - name: Download config server
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: "simpleg-eu/cp-config"
+          latest: true
+          fileName: "app.zip"
+          out-file-path: "cp-config"
+          extract: true
       - name: Run config server
         run: |
           mkdir bin
