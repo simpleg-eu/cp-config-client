@@ -26,12 +26,6 @@ jobs:
           extract: true
       - name: Run config server
         run: |
-          cd cp-config
-          chmod +x cp-config
-          ./cp-config config.yaml &
-          cd ../
-      - name: Run tests
-        run: |
           mkdir bin
           cd bin
           curl -LO https://github.com/bitwarden/sdk/releases/download/bws-v0.3.0/bws-x86_64-unknown-linux-gnu-0.3.0.zip
@@ -39,4 +33,10 @@ jobs:
           chmod +x bws
           export PATH=$PATH:$PWD
           cd ../
+          cd cp-config
+          chmod +x cp-config
+          ./cp-config config.yaml &
+          cd ../
+      - name: Run tests
+        run: |
           cargo test --all-features
