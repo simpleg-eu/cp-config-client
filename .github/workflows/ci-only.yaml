@@ -1,0 +1,39 @@
+name: CI only
+
+on:
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+
+env:
+  SECRETS_MANAGER_ACCESS_TOKEN: ${{ secrets.SECRETS_MANAGER_ACCESS_TOKEN }}
+
+jobs:
+  ci-only:
+    runs-on: ubuntu-latest
+    container: rust:1.75.0
+    timeout-minutes: 10
+
+    services:
+      cp-config:
+        image: gabriel0simpleg/cp-config:latest
+        ports:
+          - 3000:3000
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Replace cp-config url in test_data config file
+        run: |
+          sed -i 's/127.0.0.1:3000/cp-config:3000/' ./test_data/config_retriever/config.yaml
+      - name: Run tests
+        run: |
+          mkdir bin
+          cd bin
+          curl -LO https://github.com/bitwarden/sdk/releases/download/bws-v0.3.0/bws-x86_64-unknown-linux-gnu-0.3.0.zip
+          unzip bws-x86_64-unknown-linux-gnu-0.3.0.zip
+          chmod +x bws
+          export PATH=$PATH:$PWD
+          cd ../
+          cargo test --all-features
