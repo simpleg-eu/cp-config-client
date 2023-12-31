@@ -27,6 +27,7 @@ jobs:
       - name: Run config server
         run: |
           cd cp-config
+          chmod +x cp-config
           ./cp-config config.yaml &
           cd ../
       - name: Run tests
