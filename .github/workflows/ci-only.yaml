@@ -20,6 +20,8 @@ jobs:
         image: gabriel0simpleg/cp-config:latest
         ports:
           - 3000:3000
+        env:
+          SECRETS_MANAGER_ACCESS_TOKEN: ${{ secrets.SECRETS_MANAGER_ACCESS_TOKEN }}
 
     steps:
       - name: Checkout code
