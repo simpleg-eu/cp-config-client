@@ -12,23 +12,22 @@ env:
 jobs:
   ci-only:
     runs-on: ubuntu-latest
-    container: rust:1.75.0
     timeout-minutes: 10
-
-    services:
-      config:
-        image: gabriel0simpleg/cp-config:latest
-        ports:
-          - 3000:3000
-        env:
-          SECRETS_MANAGER_ACCESS_TOKEN: ${{ secrets.SECRETS_MANAGER_ACCESS_TOKEN }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Replace cp-config url in test_data config file
+      - name: Download config server
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: "simpleg-eu/cp-config"
+          fileName: "app.zip"
+          out-file-path: "cp-config"
+          extract: true
+      - name: Run config server
         run: |
-          sed -i 's/127.0.0.1:3000/config:3000/' ./test_data/config_retriever/config.yaml
+          cd cp-config
+          ./cp-config config.yaml &
+          cd ../
       - name: Run tests
         run: |
           mkdir bin
