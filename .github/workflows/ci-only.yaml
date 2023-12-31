@@ -42,4 +42,11 @@ jobs:
           cd ../
       - name: Run tests
         run: |
+          mkdir bin2
+          cd bin2
+          curl -LO https://github.com/bitwarden/sdk/releases/download/bws-v0.3.0/bws-x86_64-unknown-linux-gnu-0.3.0.zip
+          unzip bws-x86_64-unknown-linux-gnu-0.3.0.zip
+          chmod +x bws
+          export PATH=$PATH:$PWD
+          cd ../
           cargo test --all-features
