@@ -1,0 +1,133 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  SECRETS_MANAGER_ACCESS_TOKEN: ${{ secrets.SECRETS_MANAGER_ACCESS_TOKEN }}
+  ARTIFACT_NAME: "le_baguette"
+  VERSION: "${{ vars.MAJOR_VERSION }}.${{ vars.MINOR_VERSION }}.${{ github.run_number }}"
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      src: ${{ steps.filter.outputs.src }}
+      test: ${{ steps.filter.outputs.test }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            src:
+              - 'src/**'
+              - 'Cargo.toml'
+              - '.github/workflows/ci-cd.yaml'
+              - 'Dockerfile'
+            test:
+              - 'test_data/**'
+              - 'tests/**'
+              - '.github/workflows/ci-only.yaml'
+  ci:
+    needs: changes
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 10
+
+    if: ${{ needs.changes.outputs.src == 'true' || needs.changes.outputs.test == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Replace placeholder version
+        run: |
+          sed -i 's/5123.0.0/${{ env.VERSION }}/' ./Cargo.toml
+      - name: Run config server
+        run: |
+          mkdir bin
+          cd bin
+          curl -LO https://github.com/bitwarden/sdk/releases/download/bws-v0.3.0/bws-x86_64-unknown-linux-gnu-0.3.0.zip
+          unzip bws-x86_64-unknown-linux-gnu-0.3.0.zip
+          chmod +x bws
+          curl -LO https://github.com/microconfig/microconfig/releases/download/v4.9.2/microconfig-linux.zip
+          unzip microconfig-linux.zip
+          chmod +x microconfig
+          export PATH=$PATH:$PWD
+          cd ../
+          cd cp-config
+          chmod +x cp-config
+          ./cp-config config.yaml &
+          cd ../
+      - name: Run tests
+        run: |
+          mkdir bin2
+          cd bin2
+          curl -LO https://github.com/bitwarden/sdk/releases/download/bws-v0.3.0/bws-x86_64-unknown-linux-gnu-0.3.0.zip
+          unzip bws-x86_64-unknown-linux-gnu-0.3.0.zip
+          chmod +x bws
+          curl -LO https://github.com/microconfig/microconfig/releases/download/v4.9.2/microconfig-linux.zip
+          unzip microconfig-linux.zip
+          chmod +x microconfig
+          export PATH=$PATH:$PWD
+          cd ../
+          cargo test --all-features
+  create-release:
+    needs: ci
+    if: ${{ needs.changes.outputs.src == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          tag_name: v${{ env.VERSION }}
+          release_name: v${{ env.VERSION }}
+          draft: false
+          prerelease: false
+  cd:
+    needs: create-release
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - if: matrix.os == 'ubuntu-latest'
+        name: Build for Linux
+        run: |
+          cargo build --release
+          mv ./target/release/cp-config ./
+          zip client.zip cp-config
+      - if: matrix.os == 'windows-latest'
+        name: Build for Windows
+        run: |
+          cargo build --release
+          Move-Item -Path "./target/release/cp-config.exe" -Destination "./"
+          Compress-Archive -Path "cp-config.exe" -DestinationPath "client.zip"
+      - if: matrix.os == 'macos-latest'
+        name: Build for MacOS
+        run: |
+          cargo build --release
+          mv ./target/release/cp-config ./
+          zip client.zip cp-config
+      - name: Upload release asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.create-release.upload_url }}
+          asset_path: ./client.zip
+          asset_name: client-${{ matrix.os }}.zip
+          asset_content_type: application/zip
