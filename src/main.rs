@@ -42,6 +42,13 @@ async fn main() {
                 .required(true),
         )
         .arg(
+            Arg::with_name("stage")
+                .short("s")
+                .long("stage")
+                .takes_value(true)
+                .required(true),
+        )
+        .arg(
             Arg::with_name("environment")
                 .short("e")
                 .long("environment")
@@ -61,6 +68,7 @@ async fn main() {
     let output_path = args.value_of("output-path").unwrap();
     let working_path = args.value_of("working-path").unwrap();
     let host = args.value_of("host").unwrap();
+    let stage = args.value_of("stage").unwrap();
     let environment = args.value_of("environment").unwrap();
     let component = args.value_of("component").unwrap();
 
@@ -69,6 +77,7 @@ async fn main() {
         output_path: output_path.into(),
         working_path: working_path.into(),
         host: host.into(),
+        stage: stage.into(),
         environment: environment.into(),
         component: component.into(),
     };

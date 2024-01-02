@@ -20,14 +20,15 @@ pub struct ConfigRetrieverArgs {
     pub output_path: PathBuf,
     pub working_path: PathBuf,
     pub host: String,
+    pub stage: String,
     pub environment: String,
     pub component: String,
 }
 
 pub async fn config_retrieve(args: ConfigRetrieverArgs) -> Result<(), Error> {
     let request_url = format!(
-        "{}/config?environment={}&component={}",
-        args.host, args.environment, args.component
+        "{}/config?stage={}&environment={}&component={}",
+        args.host, args.stage, args.environment, args.component
     );
 
     let headers = get_headers(&args)?;
@@ -98,6 +99,8 @@ pub mod tests {
 
     use crate::config_retriever::{config_retrieve, ConfigRetrieverArgs};
 
+    const TEST_STAGE: &str = "dummy";
+
     #[tokio::test]
     pub async fn retrieve_downloads_expected_file() {
         let environment = "development";
@@ -130,6 +133,7 @@ pub mod tests {
             output_path: output_path.into(),
             working_path: working_path.into(),
             host: host.into(),
+            stage: TEST_STAGE.into(),
             environment: environment.into(),
             component: component.into(),
         };
