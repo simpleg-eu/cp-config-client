@@ -18,7 +18,6 @@ use crate::error_kind::{
 pub struct ConfigRetrieverArgs {
     pub access_token: String,
     pub output_path: PathBuf,
-    pub working_path: PathBuf,
     pub host: String,
     pub stage: String,
     pub environment: String,
@@ -131,7 +130,6 @@ pub mod tests {
         let args = ConfigRetrieverArgs {
             access_token,
             output_path: output_path.into(),
-            working_path: working_path.into(),
             host: host.into(),
             stage: TEST_STAGE.into(),
             environment: environment.into(),
@@ -142,7 +140,6 @@ pub mod tests {
         let expected_file_metadata =
             std::fs::metadata(format!("{}/{}", output_path, expected_file));
         std::fs::remove_dir_all(output_path);
-        std::fs::remove_dir_all(working_path);
 
         retrieve_result.expect("failed to get configuration");
         assert!(expected_file_metadata.is_ok());

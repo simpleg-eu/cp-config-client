@@ -28,13 +28,6 @@ async fn main() {
                 .required(true),
         )
         .arg(
-            Arg::with_name("working-path")
-                .short("w")
-                .long("working-path")
-                .takes_value(true)
-                .required(true),
-        )
-        .arg(
             Arg::with_name("host")
                 .short("h")
                 .long("host")
@@ -75,7 +68,6 @@ async fn main() {
     let config_retriever_args = ConfigRetrieverArgs {
         access_token: access_token.into(),
         output_path: output_path.into(),
-        working_path: working_path.into(),
         host: host.into(),
         stage: stage.into(),
         environment: environment.into(),
