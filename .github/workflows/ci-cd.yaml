@@ -68,7 +68,7 @@ jobs:
           cd ../
           cd cp-config
           chmod +x cp-config
-          ./cp-config config.yaml &
+          ./cp-config config/config.yaml &
           cd ../
       - name: Run tests
         run: |
