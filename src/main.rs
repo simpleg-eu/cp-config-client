@@ -59,7 +59,6 @@ async fn main() {
 
     let access_token = args.value_of("access-token").unwrap();
     let output_path = args.value_of("output-path").unwrap();
-    let working_path = args.value_of("working-path").unwrap();
     let host = args.value_of("host").unwrap();
     let stage = args.value_of("stage").unwrap();
     let environment = args.value_of("environment").unwrap();
